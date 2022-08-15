@@ -3,7 +3,8 @@
   <HelloWorld msg="Welcome to Your Vue.js App" Hidden/>
   <div>
     <button @click="inc" id="counter">Кнопка {{counter}}</button>
-    <button @click="req">API</button>
+    <button @click="reqHome">API /</button>
+    <button @click="reqCompany">API /Company</button>
     <div>{{info}}</div>
   </div>
 </template>
@@ -28,14 +29,18 @@ export default {
     inc(){
       return this.counter++
     },
-    req(){
+    reqHome(){
       // axios
       // .get('https://api.coindesk.com/v1/bpi/currentprice.json')
       // .then(response => (this.info = response));  
       axios
-      .get('http://localhost:9000')
-      .then(response => (response.data))
-      .then(response => (this.info = response.message));  
+      .get('http://localhost:9000/')
+      .then(response => (this.info = response.data))
+    },
+    reqCompany(){
+      axios
+      .get("http://localhost:9000/Company")
+      .then(response => (this.info = response.data))
     }
   }
   
