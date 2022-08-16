@@ -4,10 +4,10 @@ import (
 	"main_mod/internal/tracker/bd/models"
 )
 
-func Company(i int) models.Records {
-	return models.Company(i)
+func AllCompany() models.SliceRet {
+	return models.AllCompany()
 }
 
-func AllCompany() models.Records {
-	return models.AllCompany()
+func Company(i int) models.SliceRet {
+	return models.Company(i)
 }

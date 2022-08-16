@@ -47,9 +47,8 @@ func CompanyRouterHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 
-	resp := controller.AllCompany()
+	jsonResp, err := json.Marshal(controller.AllCompany())
 
-	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}

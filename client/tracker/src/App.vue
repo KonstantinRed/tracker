@@ -22,7 +22,7 @@ export default {
   data(){
     return{
       counter: 0,
-      info: ""
+      info: {}
     }
   },
   methods: {
@@ -35,12 +35,18 @@ export default {
       // .then(response => (this.info = response));  
       axios
       .get('http://localhost:9000/')
-      .then(response => (this.info = response.data))
+      .then((response) => {
+        this.info = response.data
+        console.log(this.info)
+      })
     },
     reqCompany(){
       axios
       .get("http://localhost:9000/Company")
-      .then(response => (this.info = response.data))
+      .then((response) => {
+        this.info = response.data
+        console.log(this.info)
+      })
     }
   }
   
