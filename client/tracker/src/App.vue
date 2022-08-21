@@ -1,23 +1,24 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App" Hidden/>
-  <div>
-    <button @click="inc" id="counter">Кнопка {{counter}}</button>
-    <button @click="reqHome">API /</button>
-    <button @click="reqCompany">API /Company</button>
-    <div>{{info}}</div>
-  </div>
+  <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
+  <!-- <HelloWorld msg="Welcome to Your Vue.js App" Hidden/> -->
+  
+  <TableTask/>
+  <!-- <TestAPI/> -->
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+// import TableCompany from './components/TableCompany.vue'
+// import TestAPI from './components/TestAPI.vue'
+import TableTask from './components/TableTask.vue'
 
 import axios from 'axios';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    // TestAPI,
+    // TableCompany,
+    TableTask,
   },
   data(){
     return{
