@@ -32,6 +32,7 @@ func main() {
 	http.HandleFunc("/Company", CompanyRouterHandler)     // установим роутер
 	http.HandleFunc("/Task", TaskRouterHandler)           // установим роутер
 	http.HandleFunc("/Task_View", Task_ViewRouterHandler) // установим роутер
+	http.HandleFunc("/Project", Project_RouterHandler)    // установим роутер
 
 	err := http.ListenAndServe(":"+PORT, nil) // задаем слушать порт
 	if err != nil {
@@ -106,6 +107,22 @@ func Task_ViewRouterHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	jsonResp, err := json.Marshal(controller.AllTask_view())
+
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	w.Write(jsonResp)
+}
+
+func Project_RouterHandler(w http.ResponseWriter, r *http.Request) {
+	defer fmt.Println("Запрос Project прошел")
+
+	cors(w)
+
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+
+	jsonResp, err := json.Marshal(controller.AllProgect())
 
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
