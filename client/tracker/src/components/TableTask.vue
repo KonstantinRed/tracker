@@ -102,7 +102,8 @@ export default {
         }
     },
     mounted() {
-        axios.get("http://localhost:9000/Task_View")
+        const par = {id: 15, name: "privit"}
+        axios.post("http://localhost:9000/TaskView", par)
         .then((response) => {
             this.TaskView = response.data
             this.ReqSucces = true
@@ -125,16 +126,6 @@ export default {
         })
     },
     methods: {
-        getTable() {
-            axios.get("http://localhost:9000/Task_View")
-                .then((response) => {
-                    this.TaskView = response.data
-                    this.ReqSucces = true
-                })
-                .catch(()=>{
-                    this.ReqSucces = false
-                })
-        },
         addTask(){
             
         },
