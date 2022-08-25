@@ -48,7 +48,7 @@
                                 <option v-for="project in NewTask.ListProject" value="{{project.Id}}" :key="project.Id">{{project.Name_project}}</Option>
                             </select>
                         </td>
-                        <td><input type="text"></td>
+                        <td><input type="text" v-model="NewTask.Name_task"></td>
                         <td><input type="text"></td>
                         <td><input type="number"></td>
                         <td><input type="number"></td>
@@ -102,8 +102,8 @@ export default {
         }
     },
     mounted() {
-        const par = {id: 15, name: "privit"}
-        axios.post("http://localhost:9000/TaskView", par)
+        // const par = {id: 15, name: "privit"}
+        axios.get("http://localhost:9000/TaskView")
         .then((response) => {
             this.TaskView = response.data
             this.ReqSucces = true
@@ -127,7 +127,9 @@ export default {
     },
     methods: {
         addTask(){
-            
+             axios.post("http://localhost:9000/AddTask", this.NewTask)
+             .then(console.log("Добавлена запись"))
+             .catch(err=>console.log("Не добавлена...", err))
         },
         dblclick_record(index){
             window.getSelection().removeAllRanges();

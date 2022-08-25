@@ -16,6 +16,7 @@ func rout() map[string]func(http.ResponseWriter, *http.Request) {
 	rout["/Task"] = r_Task
 	rout["/TaskView"] = r_TaskView
 	rout["/Project"] = r_Project
+	rout["/AddTask"] = r_AddTask
 
 	return rout
 }
@@ -89,6 +90,21 @@ func r_Project(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}
 	w.Write(jsonResp)
+}
+
+func r_AddTask(w http.ResponseWriter, r *http.Request) {
+	defer fmt.Println("Запрос AddTask прошел")
+	setHeader(w)
+
+	r.ParseForm()
+	x := r.Form.Get("Name_task")
+	fmt.Println(x)
+	// jsonResp, err := json.Marshal(controller.AddTask())
+
+	// if err != nil {
+	// 	log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	// }
+	// w.Write(jsonResp)
 }
 
 // --Router

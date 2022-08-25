@@ -15,3 +15,7 @@ func AllTask_view() []models.FTask_View {
 func GetIndexTask(i int) models.FTask {
 	return models.Task{}.GetIndex(i)
 }
+
+func AddTask() {
+
+}
