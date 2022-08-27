@@ -4,7 +4,7 @@
     <div class="ComandPanel">
         <!-- <ButtonRegular @click="addTask">Создать задачу</ButtonRegular> -->
         <ButtonRegular>Редактировать выбранный</ButtonRegular>
-        <ButtonRegular>Удалить выбранные</ButtonRegular>
+        <ButtonRegular @click="deleteTask">Удалить выбранные</ButtonRegular>
     </div>
 
     <div class="tableTask">
@@ -23,9 +23,9 @@
                     <th>Закрыта</th>
                 </tr>
             </thead>
-            <tbody v-if="ReqSucces" >
+            <tbody v-if="ErrReq == undefined" >
                     <tr  v-for="(task, index) in TaskView" :key="index" @dblclick="dblclick_record(index)">
-                        <td class="CheckBox"><input type="checkbox" v-bind:name="('task_' + index)" class="inputCheck" /></td>
+                        <td class="CheckBox"><input type="checkbox" v-bind:value="(task.id)" class="inputCheck" v-model="arrayCheckedTask"/></td>
                         <td>{{ task.id }}</td>
                         <td>{{ task.Company }}</td>
                         <td>{{ task.Project }}</td>
@@ -39,25 +39,26 @@
                         <td></td>
                         <td></td>
                         <td>
-                            <select name="Company" id="Company">
-                                <option v-for="company in NewTask.ListCompany" value="{{company.id}}" :key="company.Id">{{company.Name}}</Option>
+                            <select name="Company" id="Company" v-model="NewTask.id_company">
+                                <option v-for="company in ListCompany" :value="company.Id" :key="company.Id">{{company.Name}}</Option>
                             </select>
                         </td>
                         <td>
-                            <select name="Project" id="Project">
-                                <option v-for="project in NewTask.ListProject" value="{{project.Id}}" :key="project.Id">{{project.Name_project}}</Option>
+                            <select name="Project" id="Project" v-model="NewTask.id_project">
+                                <option v-for="project in ListProject" :value="project.Id" :key="project.Id">{{project.Name_project}}</Option>
                             </select>
                         </td>
                         <td><input type="text" v-model="NewTask.Name_task"></td>
-                        <td><input type="text"></td>
-                        <td><input type="number"></td>
-                        <td><input type="number"></td>
+                        <td><input type="text" v-model="NewTask.Description_task"></td>
+                        <td><input type="number" v-model="NewTask.Hour"></td>
+                        <td><input type="number" v-model="NewTask.Minute"></td>
                         <td><ButtonRegular @click="addTask">Добавить</ButtonRegular></td>
+                        <TD><ButtonRegular @click="Test">Тест</ButtonRegular></TD>
                     </tr>
             </tbody>
             <tbody v-else>    
                 <tr>
-                    <td style="text-align: center;" colspan="9">Ничего не вышло, попробуйте в следующий раз</td>
+                    <td style="text-align: center;" colspan="9">Ничего не вышло, попробуйте в следующий раз <span>{{ErrReq}}</span></td>
                 </tr>
             </tbody>
             
@@ -70,8 +71,6 @@
 
 <script>
 import ButtonRegular from './button/ButtonRegular.vue';
-// import PopupTask from './PopupTask.vue';
-
 import axios from 'axios';
 
 export default {
@@ -82,59 +81,96 @@ export default {
     },
     data() {
         return {
+            arrayCheckedTask: [],
             TaskView: [],
-            ReqSucces: true,
+            ErrReq: undefined,
             showModal: true,
-            ListCompany:[],
-            ListProject:[],
+            ListCompany:[
+                    {Id: 0, Name: "---"}
+            ],
+            ListProject: [
+                    {Id: 0, Name_project: "---"}
+            ],
             NewTask:
             {
-                ListCompany:[],
-                ListProject: [],
-                Name_task: "",
-                Description_task:"",
-                Hour: 0,
-                Minute: 0,
+                
+                id_company: 0,
+                id_project: 0,
+                Name_task: "Задача1",
+                Description_task:"Простейшее описание задачи",
+                Hour: 2,
+                Minute: 30,
                 Link_our_tracker: "",
-                Total_minutes: 0,
                 Closed: false,
+                Total_minutes: 0,                
             }
         }
     },
     mounted() {
-        // const par = {id: 15, name: "privit"}
-        axios.get("http://localhost:9000/TaskView")
-        .then((response) => {
-            this.TaskView = response.data
-            this.ReqSucces = true
-            console.log(response.data);
-        })
-        .catch(()=>{
-            this.ReqSucces = false
-        })
-
-        axios.get("http://localhost:9000/Company")
-        .then((response) => {
-            this.NewTask.ListCompany = response.data
-            console.log(response.data);
-        })
-
-        axios.get("http://localhost:9000/Project")
-        .then((response) => {
-            this.NewTask.ListProject = response.data
-            console.log(this.NewTask.ListProject);
-        })
+        this.startComponent()
     },
     methods: {
+        Test(){
+            console.log(this.NewTask);
+        },
         addTask(){
-             axios.post("http://localhost:9000/AddTask", this.NewTask)
-             .then(console.log("Добавлена запись"))
-             .catch(err=>console.log("Не добавлена...", err))
+            let NewTask = this.NewTask
+            axios.post("http://localhost:9000/AddTask", 
+                NewTask, 
+                {headers: {'Content-Type': 'application/json'}})
+            .then((res)=>{
+                if (!res.data.msg){
+                    console.log("Добавлена запись")
+                }else{
+                    throw new Error(res.data.msg)
+                }
+                this.startComponent()
+
+            })
+            .catch(err=>console.log(err))
+        },
+        deleteTask(){
+            axios.post("http://localhost:9000/DeleteTask", 
+                this.arrayCheckedTask, 
+                {headers: {'Content-Type': 'application/json'}})
+            .then((res)=>{
+                if (!res.data.msg){
+                    console.log("Удалены записи")
+                }else{
+                    throw new Error(res.data.msg)
+                }
+                this.startComponent()
+
+            })
+            .catch(err=>console.log(err))
         },
         dblclick_record(index){
             window.getSelection().removeAllRanges();
             console.log(this.TaskView[index]);
             this.showModal = true
+        },
+        startComponent(){
+            axios.get("http://localhost:9000/TaskView")
+            .then((response) => {
+                this.TaskView = response.data
+                this.ErrReq = undefined
+                this.arrayCheckedTask = []
+            })
+            .catch((err)=>{
+                this.ErrReq = err;
+            })
+
+            axios.get("http://localhost:9000/Company")
+            .then((response) => {
+                this.ListCompany = [ {Id: 0, Name: "---"}]
+                response.data.map((el)=>{this.ListCompany.push(el)})
+            })
+
+            axios.get("http://localhost:9000/Project")
+            .then((response) => {
+                this.ListProject = [ {Id: 0, Name_project: "---"}]
+                response.data.map((el)=>{this.ListProject.push(el)})
+            })
         }
         
     }

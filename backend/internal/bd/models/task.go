@@ -1,6 +1,10 @@
 package models
 
-import "log"
+import (
+	"log"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type Task struct{}
 
@@ -45,19 +49,20 @@ func (table Task) All() []FTask {
 func (table Task) AllView() []FTask_View {
 	task_view_sql :=
 		`SELECT 
-		Task.id as id,
-		coalesce(Company.Name, '---') as Company,
-		coalesce(Project.name_project, '---') as Project,
-		Task.name_task as Name_task,
-		Task.Description_task as Description_task,
-		Task.Hour as Hour,
-		Task.Minute as Minute,
-		Task.Closed as Closed
-	FROM public."Task" as Task 
-		Left Join "Company" as Company 
-			ON Company.id = Task.id_company
-		LEFT join "Project" as Project
-			ON Project.id = Task.id_project`
+			Task.id as id,
+			coalesce(Company.Name, '---') as Company,
+			coalesce(Project.name_project, '---') as Project,
+			Task.name_task as Name_task,
+			Task.Description_task as Description_task,
+			Task.Hour as Hour,
+			Task.Minute as Minute,
+			Task.Closed as Closed
+		FROM public."Task" as Task 
+			Left Join "Company" as Company 
+				ON Company.id = Task.id_company
+			LEFT join "Project" as Project
+				ON Project.id = Task.id_project
+		ORDER BY id`
 
 	db := Connection()
 	defer CloseConnection(db)
@@ -86,4 +91,29 @@ func (table Task) GetIndex(id int) FTask {
 	}
 
 	return task
+}
+
+func (table Task) AddTask(task FTask) error {
+
+	db := Connection()
+	defer CloseConnection(db)
+
+	_, err := db.NamedExec(
+		`INSERT INTO public."Task"(
+			id_company, id_project, name_task, description_task, hour, minute, total_minutes, link_our_tracker, closed)
+			VALUES (:id_company, :id_project, :name_task, :description_task, :hour, :minute, :total_minutes, :link_our_tracker, :closed)`, task)
+
+	return err
+}
+
+func (table Task) DeleteIndex(id []int) error {
+
+	db := Connection()
+	defer CloseConnection(db)
+
+	query, args, err := sqlx.In(`DELETE FROM public."Task" WHERE id in (?);`, id)
+	query = db.Rebind(query)
+	_, err = db.Query(query, args...)
+
+	return err
 }

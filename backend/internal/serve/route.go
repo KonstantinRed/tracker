@@ -5,8 +5,17 @@ import (
 	"fmt"
 	"log"
 	"main_mod/internal/bd/controller"
+	"main_mod/internal/bd/models"
 	"net/http"
+	"os"
 )
+
+func writeCommentAfterRequest(text string) {
+
+	if WriteHttpComment := os.Getenv("WriteHttpComment"); WriteHttpComment == "1" {
+		fmt.Println(text)
+	}
+}
 
 func rout() map[string]func(http.ResponseWriter, *http.Request) {
 
@@ -17,6 +26,7 @@ func rout() map[string]func(http.ResponseWriter, *http.Request) {
 	rout["/TaskView"] = r_TaskView
 	rout["/Project"] = r_Project
 	rout["/AddTask"] = r_AddTask
+	rout["/DeleteTask"] = r_DeleteTask
 
 	return rout
 }
@@ -31,7 +41,7 @@ func SetRout(mux *http.ServeMux) {
 // ++Router
 
 func r_Home(w http.ResponseWriter, r *http.Request) {
-	defer fmt.Println("Запрос прошел")
+	defer writeCommentAfterRequest("Запрос прошел")
 	setHeader(w)
 
 	resp := make(map[string]string)
@@ -44,7 +54,7 @@ func r_Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func r_Company(w http.ResponseWriter, r *http.Request) {
-	defer fmt.Println("Запрос company прошел")
+	defer writeCommentAfterRequest("Запрос company прошел")
 	setHeader(w)
 
 	jsonResp, err := json.Marshal(controller.AllCompany())
@@ -56,7 +66,7 @@ func r_Company(w http.ResponseWriter, r *http.Request) {
 }
 
 func r_Task(w http.ResponseWriter, r *http.Request) {
-	defer fmt.Println("Запрос Task прошел")
+	defer writeCommentAfterRequest("Запрос Task прошел")
 	setHeader(w)
 
 	jsonResp, err := json.Marshal(controller.AllTask())
@@ -68,7 +78,7 @@ func r_Task(w http.ResponseWriter, r *http.Request) {
 }
 
 func r_TaskView(w http.ResponseWriter, r *http.Request) {
-	defer fmt.Println("Запрос Task_View прошел")
+	defer writeCommentAfterRequest("Запрос Task_View прошел")
 
 	setHeader(w)
 
@@ -81,7 +91,7 @@ func r_TaskView(w http.ResponseWriter, r *http.Request) {
 }
 
 func r_Project(w http.ResponseWriter, r *http.Request) {
-	defer fmt.Println("Запрос Project прошел")
+	defer writeCommentAfterRequest("Запрос Project прошел")
 	setHeader(w)
 
 	jsonResp, err := json.Marshal(controller.AllProgect())
@@ -93,18 +103,71 @@ func r_Project(w http.ResponseWriter, r *http.Request) {
 }
 
 func r_AddTask(w http.ResponseWriter, r *http.Request) {
-	defer fmt.Println("Запрос AddTask прошел")
 	setHeader(w)
+	if r.Method == http.MethodOptions {
+		defer writeCommentAfterRequest("Запрос AddTask прошел (Options)")
+		return
+	}
+	writeCommentAfterRequest("Запрос AddTask прошел")
 
-	r.ParseForm()
-	x := r.Form.Get("Name_task")
-	fmt.Println(x)
-	// jsonResp, err := json.Marshal(controller.AddTask())
+	decoder := json.NewDecoder(r.Body)
 
-	// if err != nil {
-	// 	log.Fatalf("Error happened in JSON marshal. Err: %s", err)
-	// }
-	// w.Write(jsonResp)
+	var NewTask models.FTask
+	err := decoder.Decode(&NewTask)
+	if err != nil {
+		log.Printf("%#v\n", err)
+	}
+
+	err = controller.AddTask(NewTask)
+
+	var returnStruct struct {
+		Msg string `json:"msg"`
+	}
+	if err != nil {
+		returnStruct.Msg = err.Error()
+	}
+
+	jsonResp, err := json.Marshal(returnStruct)
+
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	w.Write(jsonResp)
+}
+
+func r_DeleteTask(w http.ResponseWriter, r *http.Request) {
+	setHeader(w)
+	if r.Method == http.MethodOptions {
+		defer writeCommentAfterRequest("Запрос r_DeleteTask прошел (Options)")
+		return
+	}
+	writeCommentAfterRequest("Запрос DeleteTask прошел")
+
+	decoder := json.NewDecoder(r.Body)
+
+	var sliceInt []int
+	err := decoder.Decode(&sliceInt)
+	if err != nil {
+		log.Printf("%#v\n", err)
+	} else {
+		fmt.Println(sliceInt)
+	}
+
+	err = controller.DeleteTask(sliceInt)
+
+	var returnStruct struct {
+		Msg string `json:"msg"`
+	}
+	if err != nil {
+		returnStruct.Msg = err.Error()
+	}
+
+	jsonResp, err := json.Marshal(returnStruct)
+
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	w.Write(jsonResp)
 }
 
 // --Router

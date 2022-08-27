@@ -12,14 +12,10 @@ import (
 	env "github.com/joho/godotenv"
 )
 
-const (
-	PORT = "9000"
-)
-
 func set_env() {
 	err := env.Load()
 	if err != nil {
-		log.Panicf("Error loading env:")
+		log.Panicf("Error loading env:%v", err)
 	}
 }
 
@@ -27,5 +23,4 @@ func main() {
 	set_env()
 
 	serve.HttpServe()
-
 }
